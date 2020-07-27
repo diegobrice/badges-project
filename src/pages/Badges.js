@@ -1,45 +1,90 @@
 import React from "react";
-import BadgesList from "../components/BadgesList";
+// import BadgesList from "../components/BadgesList";
 import "../styles/Badges.css";
 import logo from "../images/react_transparent.png";
 import { Link } from "react-router-dom";
 
 class Badges extends React.Component {
   state = {
-    data: [
-      {
-        id: "2de30c42-9deb-40fc-a41f-05e62b5939a7",
-        firstName: "Freda",
-        lastName: "Grady",
-        email: "Leann_Berge@gmail.com",
-        jobTitle: "Legacy Brand Director",
-        twitter: "FredaGrady22221-7573",
-        avatarUrl:
-          "https://www.gravatar.com/avatar/f63a9c45aca0e7e7de0782a6b1dff40b?d=identicon",
-      },
-      {
-        id: "d00d3614-101a-44ca-b6c2-0be075aeed3d",
-        firstName: "Major",
-        lastName: "Rodriguez",
-        email: "Ilene66@hotmail.com",
-        jobTitle: "Human Research Architect",
-        twitter: "ajorRodriguez61545",
-        avatarUrl:
-          "https://www.gravatar.com/avatar/d57a8be8cb9219609905da25d5f3e50a?d=identicon",
-      },
-      {
-        id: "63c03386-33a2-4512-9ac1-354ad7bec5e9",
-        firstName: "Daphney",
-        lastName: "Torphy",
-        email: "Ron61@hotmail.com",
-        jobTitle: "National Markets Officer",
-        twitter: "DaphneyTorphy96105",
-        avatarUrl:
-          "https://www.gravatar.com/avatar/e74e87d40e55b9ff9791c78892e55cb7?d=identicon",
-      },
-    ],
+    nextPage: 1,
+    loading: true,
+    error: null,
+
+    // data: [
+    //   {
+    //     id: "2de30c42-9deb-40fc-a41f-05e62b5939a7",
+    //     firstName: "Freda",
+    //     lastName: "Grady",
+    //     email: "Leann_Berge@gmail.com",
+    //     jobTitle: "Legacy Brand Director",
+    //     twitter: "FredaGrady22221-7573",
+    //     avatarUrl:
+    //       "https://www.gravatar.com/avatar/f63a9c45aca0e7e7de0782a6b1dff40b?d=identicon",
+    //   },
+    //   {
+    //     id: "d00d3614-101a-44ca-b6c2-0be075aeed3d",
+    //     firstName: "Major",
+    //     lastName: "Rodriguez",
+    //     email: "Ilene66@hotmail.com",
+    //     jobTitle: "Human Research Architect",
+    //     twitter: "ajorRodriguez61545",
+    //     avatarUrl:
+    //       "https://www.gravatar.com/avatar/d57a8be8cb9219609905da25d5f3e50a?d=identicon",
+    //   },
+    //   {
+    //     id: "63c03386-33a2-4512-9ac1-354ad7bec5e9",
+    //     firstName: "Daphney",
+    //     lastName: "Torphy",
+    //     email: "Ron61@hotmail.com",
+    //     jobTitle: "National Markets Officer",
+    //     twitter: "DaphneyTorphy96105",
+    //     avatarUrl:
+    //       "https://www.gravatar.com/avatar/e74e87d40e55b9ff9791c78892e55cb7?d=identicon",
+    //   },
+    // ],
+
+    data: {
+      results: [],
+    },
   };
+
+  API_URL = "https://rickandmortyapi.com/api/character";
+
+  fetchCharacters = async () => {
+    this.setState({ loading: true, error: null });
+
+    try {
+      const response = await fetch(
+        `https://rickandmortyapi.com/api/character?page=${this.state.nextPage}`
+      );
+      const data = await response.json();
+      console.log(data.results);
+
+      this.setState({
+        nextPage: this.state.nextPage + 1,
+        loading: false,
+        data: {
+          info: data.info,
+          results: [].concat(this.state.data.results, data.results),
+        },
+      });
+    } catch (error) {
+      this.setState({
+        loading: false,
+        error: error,
+      });
+    }
+  };
+
+  componentDidMount() {
+    this.fetchCharacters();
+  }
+
   render() {
+    if (this.state.error) {
+      return `Error: ${this.state.error.message}`;
+    }
+
     return (
       <React.Fragment>
         <div className="Badges">
@@ -59,7 +104,57 @@ class Badges extends React.Component {
 
           <div className="Badges__list">
             <div className="Badges__container">
-              <BadgesList badges={this.state.data} />
+              {/* <BadgesList badges={this.state.data} /> */}
+              <div className="row">
+                {this.state.data.results.map((character, index) => {
+                  return (
+                    <div className="col-6 my-2" key={index}>
+                      <div className="card">
+                        <div className="card-header p-0">
+                          <img
+                            className="img-fluid"
+                            src={character.image}
+                            alt=""
+                          />
+                        </div>
+                        <div className="card-body">
+                          <h5>{character.name}</h5>
+                          <p>{character.gender}</p>
+                          <div className="badge badge-primary mr-1">
+                            {character.species}
+                          </div>
+                          {character.status === "Alive" ? (
+                            <div className="badge badge-success">
+                              {character.status}
+                            </div>
+                          ) : (
+                            <div className="badge badge-danger">
+                              {character.status}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {this.state.loading && (
+                <div className="alert alert-primary" role="alert">
+                  Loading data...
+                </div>
+              )}
+
+              {!this.state.loading && (
+                <button
+                  className="btn btn-primary my-3"
+                  onClick={() => {
+                    this.fetchCharacters();
+                  }}
+                >
+                  Load More
+                </button>
+              )}
             </div>
           </div>
         </div>

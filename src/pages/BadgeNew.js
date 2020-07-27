@@ -32,7 +32,7 @@ class BadgeNew extends React.Component {
               <span className="font-weight-light">Badges</span>
               <span className="font-weight-bold">App</span>
             </h2>
-            <h4>Pagina de Inicio</h4>
+            <h4>New Badge</h4>
           </div>
         </div>
 
